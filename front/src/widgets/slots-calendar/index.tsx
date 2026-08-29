@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Button, Card, CardContent, CardHeader, CardTitle } from '@/shared/ui';
+import { Button, Card, CardContent, CardHeader, CardTitle, EmptyState } from '@/shared/ui';
+import { CalendarXIcon, ClockIcon } from 'lucide-react';
 import type { components } from '@/shared/api/types';
 
 type DaySlots = components['schemas']['DaySlots'];
@@ -15,6 +16,8 @@ export function SlotsCalendar({ days, onSelectSlot, selectedSlot }: SlotsCalenda
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   const selectedDay = days.find((d) => d.date === selectedDate);
+  // Доступные слоты выбранного дня — только те, что не заняты (isAvailable)
+  const availableSlots = selectedDay?.slots.filter((s) => s.isAvailable) ?? [];
 
   return (
     <div className="space-y-4">
@@ -35,16 +38,29 @@ export function SlotsCalendar({ days, onSelectSlot, selectedSlot }: SlotsCalenda
         })}
       </div>
 
+      {days.length === 0 && (
+        <EmptyState
+          icon={CalendarXIcon}
+          title="Нет доступных слотов"
+          description="На данный момент нет дат для записи"
+        />
+      )}
+
       {selectedDay && (
         <Card>
           <CardHeader>
             <CardTitle className="text-sm">{selectedDate}</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-3 gap-2">
-              {selectedDay.slots
-                .filter((s) => s.isAvailable)
-                .map((slot) => (
+            {availableSlots.length === 0 ? (
+              <EmptyState
+                icon={ClockIcon}
+                title="Нет доступных слотов"
+                description="В этот день нет свободного времени"
+              />
+            ) : (
+              <div className="grid grid-cols-3 gap-2">
+                {availableSlots.map((slot) => (
                   <Button
                     key={slot.start}
                     variant={selectedSlot?.start === slot.start ? 'default' : 'outline'}
@@ -57,7 +73,8 @@ export function SlotsCalendar({ days, onSelectSlot, selectedSlot }: SlotsCalenda
                     })}
                   </Button>
                 ))}
-            </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
