@@ -2,6 +2,7 @@ import {
   Button,
   Card,
   CardContent,
+  EmptyState,
   Table,
   TableBody,
   TableCell,
@@ -9,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui';
+import { CalendarPlusIcon } from 'lucide-react';
 import { formatDate } from '@/shared/lib';
 import type { components } from '@/shared/api/types';
 
@@ -38,14 +40,31 @@ export function EventTypesList({ eventTypes, onAdd }: EventTypesListProps) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {eventTypes.map((et) => (
-                <TableRow key={et.id}>
-                  <TableCell className="font-mono text-xs">{et.id}</TableCell>
-                  <TableCell>{et.title}</TableCell>
-                  <TableCell>{et.durationMinutes} мин</TableCell>
-                  <TableCell>{formatDate(et.createdAt)}</TableCell>
+              {eventTypes.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="h-32 whitespace-normal p-0">
+                    <EmptyState
+                      icon={CalendarPlusIcon}
+                      title="Пока нет типов событий"
+                      description="Создайте первый тип события, чтобы начать принимать записи"
+                      action={
+                        <Button variant="outline" size="sm" onClick={onAdd} className="mt-2">
+                          Добавить тип события
+                        </Button>
+                      }
+                    />
+                  </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                eventTypes.map((et) => (
+                  <TableRow key={et.id}>
+                    <TableCell className="font-mono text-xs">{et.id}</TableCell>
+                    <TableCell>{et.title}</TableCell>
+                    <TableCell>{et.durationMinutes} мин</TableCell>
+                    <TableCell>{formatDate(et.createdAt)}</TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>

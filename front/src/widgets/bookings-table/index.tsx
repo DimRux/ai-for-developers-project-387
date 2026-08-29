@@ -3,6 +3,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  EmptyState,
   Table,
   TableBody,
   TableCell,
@@ -10,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/shared/ui';
+import { CalendarXIcon } from 'lucide-react';
 import { formatDateTime } from '@/shared/lib';
 import type { components } from '@/shared/api/types';
 
@@ -36,14 +38,26 @@ export function BookingsTable({ bookings }: BookingsTableProps) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {bookings.map((b) => (
-              <TableRow key={b.id}>
-                <TableCell>{b.eventTypeTitle}</TableCell>
-                <TableCell>{b.guest.name}</TableCell>
-                <TableCell>{formatDateTime(b.start)}</TableCell>
-                <TableCell>{formatDateTime(b.end)}</TableCell>
+            {bookings.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={4} className="h-32 whitespace-normal p-0">
+                  <EmptyState
+                    icon={CalendarXIcon}
+                    title="Пока нет встреч"
+                    description="Забронированные встречи появятся здесь"
+                  />
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              bookings.map((b) => (
+                <TableRow key={b.id}>
+                  <TableCell>{b.eventTypeTitle}</TableCell>
+                  <TableCell>{b.guest.name}</TableCell>
+                  <TableCell>{formatDateTime(b.start)}</TableCell>
+                  <TableCell>{formatDateTime(b.end)}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </CardContent>
