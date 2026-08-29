@@ -1,5 +1,6 @@
-### Hexlet tests and linter status:
-[![Actions Status](https://github.com/DimRux/ai-for-developers-project-387/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/DimRux/ai-for-developers-project-387/actions)
+# Booking Calendar
+
+[![Actions Status](https://github.com/DimRux/ai-for-developers-project-386/actions/workflows/hexlet-check.yml/badge.svg)](https://github.com/DimRux/ai-for-developers-project-386/actions)
 
 Календарь бронирований (аналог cal.com) — npm workspaces монорепозиторий с `spec/`, `front/` и `back/`.
 

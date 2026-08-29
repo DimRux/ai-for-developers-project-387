@@ -1,0 +1,37 @@
+{
+  "name": "booking-calendar",
+  "version": "1.0.1",
+  "private": true,
+  "description": "Lightweight booking calendar — cal.com-like",
+  "workspaces": [
+    "spec",
+    "front",
+    "back"
+  ],
+  "scripts": {
+    "spec:compile": "npm run compile -w spec",
+    "spec:watch": "npm run watch -w spec",
+    "spec:format": "npm run format -w spec",
+    "front:dev": "npm run dev -w front",
+    "front:mock": "npm run dev:mock -w front",
+    "front:build": "npm run build -w front",
+    "front:lint": "npm run lint -w front",
+    "front:api:gen": "npm run api:gen -w front",
+    "back:dev": "npm run dev -w back",
+    "back:build": "npm run build -w back",
+    "back:start": "npm run start:prod -w back",
+    "back:lint": "npm run lint -w back",
+    "back:api:gen": "npm run api:gen -w back",
+    "db:migrate": "npm run prisma:migrate -w back",
+    "db:seed": "npm run db:seed -w back",
+    "db:reset": "npm run db:reset -w back",
+    "sync:contract": "npm run spec:compile && npm run front:api:gen && npm run back:api:gen",
+    "dev": "concurrently \"npm run back:dev\" \"npm run front:dev\"",
+    "back:test": "npm run test:e2e -w back",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}

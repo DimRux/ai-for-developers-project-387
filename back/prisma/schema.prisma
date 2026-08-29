@@ -1,0 +1,44 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Owner {
+  id                String @id @default(uuid())
+  name              String
+  email             String
+  timezone          String
+  workingHoursStart String
+  workingHoursEnd   String
+  slotStepMinutes   Int    @default(30)
+  bookingWindowDays Int    @default(14)
+}
+
+model EventType {
+  id              String    @id
+  title           String
+  description     String
+  durationMinutes Int
+  createdAt       DateTime  @default(now())
+  bookings        Booking[]
+  @@index([createdAt])
+}
+
+model Booking {
+  id             String     @id @default(uuid())
+  eventTypeId    String
+  eventTypeTitle String
+  start          DateTime
+  end            DateTime
+  guestName      String
+  guestEmail     String
+  guestNotes     String?
+  createdAt      DateTime   @default(now())
+  eventType      EventType  @relation(fields: [eventTypeId], references: [id])
+  @@index([start])
+  @@index([eventTypeId, start])
+}
