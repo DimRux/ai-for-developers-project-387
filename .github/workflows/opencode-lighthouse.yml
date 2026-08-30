@@ -1,0 +1,76 @@
+name: Scheduled Lighthouse Check
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # nightly at 02:00 UTC
+  workflow_dispatch: {} # manual run at any time
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+        working-directory: back
+
+      - name: Build frontend
+        run: npm run front:build
+
+      - name: Run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli@0.15.x
+          lhci autorun
+        continue-on-error: true
+
+      - name: Upload Lighthouse report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-report
+          path: .lighthouseci/
+          retention-days: 14
+
+  opencode:
+    needs: lighthouse
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Download Lighthouse report
+        uses: actions/download-artifact@v4
+        with:
+          name: lighthouse-report
+          path: .lighthouseci
+
+      - name: Run opencode
+        uses: anomalyco/opencode/github@latest
+        env:
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+        with:
+          model: opencode/deepseek-v4-flash
+          prompt: |
+            The Lighthouse CI reports are in the .lighthouseci/ directory (JSON and HTML files).
+            Read them and summarize the scores for performance, accessibility,
+            best-practices and SEO categories.
+            Based on the audits, list concrete and prioritized fixes for the front/ SPA.
+            Open a GitHub Issue titled "Lighthouse report <today's date>" containing
+            the score summary and the recommended fixes, so the team can review it
+            in the morning and decide what to change.
