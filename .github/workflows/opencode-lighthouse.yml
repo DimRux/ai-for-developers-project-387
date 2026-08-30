@@ -31,6 +31,16 @@ jobs:
           lhci autorun
         continue-on-error: true
 
+      - name: Report Lighthouse status
+        if: always()
+        run: |
+          if [ -d .lighthouseci ] && [ -n "$(ls -A .lighthouseci 2>/dev/null)" ]; then
+            echo "Lighthouse report generated:"
+            ls -la .lighthouseci
+          else
+            echo "WARNING: .lighthouseci/ is missing or empty — no Lighthouse report produced."
+          fi
+
       - name: Upload Lighthouse report
         uses: actions/upload-artifact@v4
         if: always()
@@ -38,6 +48,7 @@ jobs:
           name: lighthouse-report
           path: .lighthouseci/
           retention-days: 14
+          if-no-files-found: warn
 
   opencode:
     needs: lighthouse
@@ -56,6 +67,7 @@ jobs:
 
       - name: Download Lighthouse report
         uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: lighthouse-report
           path: .lighthouseci
@@ -67,10 +79,20 @@ jobs:
         with:
           model: opencode/deepseek-v4-flash
           prompt: |
-            The Lighthouse CI reports are in the .lighthouseci/ directory (JSON and HTML files).
-            Read them and summarize the scores for performance, accessibility,
-            best-practices and SEO categories.
-            Based on the audits, list concrete and prioritized fixes for the front/ SPA.
-            Open a GitHub Issue titled "Lighthouse report <today's date>" containing
-            the score summary and the recommended fixes, so the team can review it
-            in the morning and decide what to change.
+            You are generating the morning report for a nightly Lighthouse check.
+            The run URL is: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            First check the .lighthouseci/ directory:
+
+            - If it exists and contains Lighthouse reports (JSON/HTML), read them and
+              summarize the scores for performance, accessibility, best-practices and
+              SEO categories. Based on the audits, list concrete and prioritized fixes
+              for the front/ SPA. Open a GitHub Issue titled "Lighthouse report <today's date>"
+              containing the score summary and the recommended fixes, so the team can
+              review it in the morning and decide what to change.
+
+            - If .lighthouseci/ is missing or empty, the nightly Lighthouse check failed
+              to produce a report. Open a GitHub Issue titled
+              "Lighthouse check failed <today's date>" explaining that no report was
+              generated, include the run URL above, and ask the team to investigate the
+              lighthouse job (check the frontend build and lhci autorun steps).
