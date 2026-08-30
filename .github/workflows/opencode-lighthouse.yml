@@ -49,6 +49,7 @@ jobs:
           path: .lighthouseci/
           retention-days: 14
           if-no-files-found: warn
+          include-hidden-files: true
 
   opencode:
     needs: lighthouse
