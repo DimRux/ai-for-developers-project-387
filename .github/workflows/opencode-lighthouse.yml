@@ -55,6 +55,7 @@ jobs:
     needs: lighthouse
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     permissions:
       id-token: write
       contents: write
@@ -77,23 +78,28 @@ jobs:
         uses: anomalyco/opencode/github@latest
         env:
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           model: opencode/deepseek-v4-flash
+          use_github_token: true
           prompt: |
-            You are generating the morning report for a nightly Lighthouse check.
-            The run URL is: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            You are generating a morning report from a nightly Lighthouse run.
+            Run URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
-            First check the .lighthouseci/ directory:
+            Rules:
+            - Do NOT read or explore the application source code.
+            - Do NOT inspect environment variables, tokens, or the action internals.
+            - GitHub CLI (gh) is already authenticated — use it directly.
 
-            - If it exists and contains Lighthouse reports (JSON/HTML), read them and
-              summarize the scores for performance, accessibility, best-practices and
-              SEO categories. Based on the audits, list concrete and prioritized fixes
-              for the front/ SPA. Open a GitHub Issue titled "Lighthouse report <today's date>"
-              containing the score summary and the recommended fixes, so the team can
-              review it in the morning and decide what to change.
+            If .lighthouseci/ contains JSON reports:
+            1. Read ONLY the .lighthouseci/*.json files (the median run is enough).
+            2. Extract category scores: performance, accessibility, best-practices, SEO.
+            3. From the failing audits, list up to 5 concrete, prioritized fixes for the front/ SPA.
+            4. Open exactly ONE issue with `gh issue create`, title
+               "Lighthouse report <YYYY-MM-DD>", body = scores + fixes + the run URL.
+            Then STOP. Do not open PRs or branches, and make no further tool calls.
 
-            - If .lighthouseci/ is missing or empty, the nightly Lighthouse check failed
-              to produce a report. Open a GitHub Issue titled
-              "Lighthouse check failed <today's date>" explaining that no report was
-              generated, include the run URL above, and ask the team to investigate the
-              lighthouse job (check the frontend build and lhci autorun steps).
+            If .lighthouseci/ is missing or empty:
+            - Open exactly ONE issue with `gh issue create`, titled
+              "Lighthouse check failed <YYYY-MM-DD>", body = the run URL and a request
+              to investigate the lighthouse job. Then STOP.
