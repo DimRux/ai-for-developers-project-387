@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/DimRux/ai-for-developers-project-387/compare/booking-calendar-v1.0.1...booking-calendar-v1.1.0) (2026-08-30)
+
+
+### Features
+
+* **front:** add empty states to bookings, event types and slots ([69ad78b](https://github.com/DimRux/ai-for-developers-project-387/commit/69ad78b33b1a974f499044a0b5920dcb1edb5497))
+
 ## [1.0.1](https://github.com/DimRux/ai-for-developers-project-386/compare/booking-calendar-v1.0.0...booking-calendar-v1.0.1) (2026-08-01)
 
 
